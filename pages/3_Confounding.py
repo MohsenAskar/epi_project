@@ -125,7 +125,7 @@ st.markdown("### An interactive visualization tool for students")
 ######################################
 # Create columns for controls & plot #
 ######################################
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Wrap your existing visualization content in:
 with viz_tab:
