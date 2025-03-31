@@ -23,7 +23,7 @@ encountered in epidemiological research and public health data analysis.
 """)
 
 # Create tabs for Visualization and Code Lab
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Visualization Tab Content
 with viz_tab:
