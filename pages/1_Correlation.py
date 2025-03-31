@@ -13,7 +13,7 @@ st.set_page_config(layout="wide")
 st.title("Understanding Correlation")
 
 # Create tabs to separate visualization from code lab
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Visualization tab content
 with viz_tab:
