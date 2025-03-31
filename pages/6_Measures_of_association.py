@@ -65,11 +65,30 @@ with viz_tab:
     }
     contingency_df = pd.DataFrame(default_data, index=['Exposed', 'Unexposed'])
 
-    # Display an editable data table
+    # Add CSS to stabilize the table
+    st.markdown("""
+    <style>
+        /* Fix table dimensions and prevent reshaping */
+        .stDataFrame, .stDataEditor {
+            width: 500px !important;  /* Fixed width */
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        
+        /* Prevent container from expanding and contracting */
+        [data-testid="column"] {
+            width: fit-content !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Display an editable data table with fixed dimensions
     edited_df = st.data_editor(
         contingency_df, 
         key="contingency_table",
-        use_container_width=True,
+        use_container_width=False,  # Changed from True to False
+        width=480,  # Set explicit width
+        height=150,  # Set explicit height
         num_rows="fixed",
         column_config={
             "Cases": st.column_config.NumberColumn(
