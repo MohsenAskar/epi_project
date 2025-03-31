@@ -12,7 +12,8 @@ st.set_page_config(
     layout="wide"
 )
 
-st.sidebar.image("https://en.uit.no/ressurs/uit/2020web/gfx/logo/UiT_Logo_Eng_Sort.svg", width=200)     
+# Set up sidebar navigation
+st.sidebar.image("https://en.uit.no/ressurs/uit/2020web/gfx/logo/UiT_Logo_Eng_Sort.svg", width=200)       
 
 # Convert the image to a base64 string
 def image_to_base64(image_path):
@@ -20,7 +21,7 @@ def image_to_base64(image_path):
         return base64.b64encode(img_file.read()).decode('utf-8')
 
 # Load your image from a local path
-image_path = ("utils/cartoon.JPG")
+image_path = (r"C:\Users\mas082\OneDrive - UiT Office 365\Desktop\Introduce_Your_Self\cartoon.JPG")
 # Get the base64 string of the image
 image_base64 = image_to_base64(image_path)
 
