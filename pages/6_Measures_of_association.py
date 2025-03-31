@@ -65,30 +65,13 @@ with viz_tab:
     }
     contingency_df = pd.DataFrame(default_data, index=['Exposed', 'Unexposed'])
 
-    # Add CSS to stabilize the table
-    st.markdown("""
-    <style>
-        /* Fix table dimensions and prevent reshaping */
-        .stDataFrame, .stDataEditor {
-            width: 500px !important;  /* Fixed width */
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-        
-        /* Prevent container from expanding and contracting */
-        [data-testid="column"] {
-            width: fit-content !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Display an editable data table with fixed dimensions
+    # Display an editable data table with fixed dimensions - NO container divs
     edited_df = st.data_editor(
         contingency_df, 
         key="contingency_table",
-        use_container_width=False,  # Changed from True to False
-        width=480,  # Set explicit width
-        height=150,  # Set explicit height
+        use_container_width=False,  # Important: set to FALSE
+        width=480,  # Fixed width
+        height=150,  # Fixed height
         num_rows="fixed",
         column_config={
             "Cases": st.column_config.NumberColumn(
@@ -105,7 +88,6 @@ with viz_tab:
             )
         }
     )
-
     # Extract the values from the edited table
     exposed_cases = edited_df.iloc[0, 0]  # Exposed Cases (row 0, column 0)
     exposed_noncases = edited_df.iloc[0, 1]  # Exposed Non-cases (row 0, column 1)
