@@ -12,6 +12,7 @@ st.set_page_config(
     layout="wide"
 )
 
+st.sidebar.image("https://en.uit.no/ressurs/uit/2020web/gfx/logo/UiT_Logo_Eng_Sort.svg", width=200)     
 
 # Convert the image to a base64 string
 def image_to_base64(image_path):
