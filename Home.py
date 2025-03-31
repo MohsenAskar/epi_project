@@ -69,6 +69,7 @@ This educational tool helps you understand key
 epidemiological concepts through interactive visualizations and examples.
 
 ### Available epidemiological modules:
+- **Data Distributions**: Understand the common data distribution patterns
 - **Correlation**: Understand the relationship between two variables
 - **Stratification**: Observe how data is split into groups
 - **Confounding**: See how a third variable affects the relationship between two others
@@ -77,21 +78,6 @@ epidemiological concepts through interactive visualizations and examples.
 - **Measures of Association**: Learn about key measures like Risk Ratio, Odds Ratio, and Hazard Ratio
 - **Epidemiological Study Designs**: Explore different study designs like Cohort, Case-Control, and Cross-Sectional
 - **Causal Inference and DAGs**: Understand the concept of causality and Directed Acyclic Graphs
-- **Statistical Methods in Epidemiology**: Learn about statistical tests like logistic regression, Cox proportional hazards, and more
-- **Screening and Diagnostic Tests**: Understand the concepts of sensitivity, specificity, positive predictive value, and negative predictive value
-- **Disease Frequency and Measures**: Learn about measures of disease frequency
-- **Meta-Analysis and Systematic Reviews**: Understand the process of combining results from multiple studies
-- **Machine Learning in Epidemiology**: Explore the basic concepts of machine learning in epidemiology
-- **Network Analysis in Epidemiology**: Learn about network analysis and its applications in epidemiology
-- **Target Trial Emulation in Epidemiology**: Understand the concept of target trial emulation
-- **Quantitative Bias Analysis**: Learn about the concept of quantitative bias analysis
-- **Clinical Epidemiology**: Learn about the application of epidemiology in clinical settings
-- **Environmental and Occupational Epidemiology**: Learn about the application of epidemiology in environmental and occupational settings
-- **Time-to-Event (Survival) Analysis**: Understand the concept of time-to-event analysis
-- **Longitudinal Data Analysis**: Learn about the analysis of longitudinal data
-- **Time Series Analysis**: Learn about the analysis of time series data
-- **Bayesian Methods in Epidemiology**:  Learn about the application of Bayesian methods in epidemiology
-- **Data Management & Wrangling for Epidemiology**:  Learn about data management and wrangling techniques for epidemiological data
 
 Select a concept from the sidebar to begin exploring.
 """)
