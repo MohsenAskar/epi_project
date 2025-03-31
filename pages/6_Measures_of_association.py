@@ -71,7 +71,7 @@ with viz_tab:
         key="contingency_table",
         use_container_width=False,  # Important: set to FALSE
         width=480,  # Fixed width
-        height=110,  # Fixed height
+        height=108,  # Fixed height
         num_rows="fixed",
         column_config={
             "Cases": st.column_config.NumberColumn(
