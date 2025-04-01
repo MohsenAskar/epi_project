@@ -225,9 +225,9 @@ def risk_based_measures_tab(exposed_cases, exposed_noncases, unexposed_cases, un
     # Links to additional resources
     st.subheader("Additional Resources")
     st.markdown("""
-    - [Link 1
-    - [Link 2 
-    - [Link 3
+    - [Link 1]
+    - [Link 2] 
+    - [Link 3]
     """)
 
 def odds_based_measures_tab(exposed_cases, exposed_noncases, unexposed_cases, unexposed_noncases):
