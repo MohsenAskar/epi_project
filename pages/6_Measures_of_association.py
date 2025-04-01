@@ -392,7 +392,7 @@ with main_tabs[0]:
     exposed_cases, exposed_noncases, unexposed_cases, unexposed_noncases = display_2x2_table()
     
     # Create tabs for risk-based vs odds-based measures
-    measure_tabs = st.tabs(["Risk-Based Measures", "Odds-Based Measures"])
+    measure_tabs = st.tabs(["⚠️Risk-Based Measures", "⚖️Odds-Based Measures"])
     
     # Populate Risk-Based Measures tab
     with measure_tabs[0]:
