@@ -225,9 +225,9 @@ def risk_based_measures_tab(exposed_cases, exposed_noncases, unexposed_cases, un
     # Links to additional resources
     st.subheader("Additional Resources")
     st.markdown("""
-    - [CDC: Principles of Epidemiology](https://www.cdc.gov/csels/dsepd/ss1978/lesson3/section5.html)
-    - [BMJ: Risk ratio vs. Risk difference](https://www.bmj.com/content/348/bmj.g1741)
-    - [MedCalc: Relative risk calculator](https://www.medcalc.org/calc/relative_risk.php)
+    - [Link 1
+    - [Link 2 
+    - [Link 3
     """)
 
 def odds_based_measures_tab(exposed_cases, exposed_noncases, unexposed_cases, unexposed_noncases):
