@@ -91,8 +91,8 @@ st.write("""
 2. Each page contains interactive elements - adjust sliders and inputs to see how they affect the results
 3. Read the explanations provided with each visualization
 4. Each module consists of two part: 
-    - Interactive visualization: where you can explore different concepts and interactive visulaizations of the module topic.
-    - CodeLaboratory: where you can explore Python code on how to implement the module topic in practice. 
+    - **Interactive visualization**: where you can explore different concepts and interactive visulaizations of the module topic.
+    - **CodeLaboratory**: where you can explore Python code on how to implement the module topic in practice. 
 5. If you need a definition or explanation of a term, search it up in the **Definitions** module.
 """)
 
