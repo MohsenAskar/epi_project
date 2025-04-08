@@ -177,7 +177,7 @@ a real phenomenon that needs to be described and understood.
 # Controls & Data Visualization #
 #################################
 
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Interactive Visualization", "📘 Educational Content", "🧠 Quiz & Exercises", "💻 Code Laboratory"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Interactive Visualization", "📘 Educational Content", "🧐 Quiz & Exercises", "💻 Code Laboratory"])
 
 with tab1:
     st.markdown("### Interactive Effect Modification Explorer")
@@ -254,7 +254,7 @@ with tab1:
         # Display options
         visualization_type = st.radio(
             "Visualization Type:",
-            ["Scatter Plot", "Overlay Plot", "Effect Size Comparison"]
+            ["Histogram Plot", "Scatter Plot", "Effect Size Comparison"]
         )
         
         show_regression = st.checkbox("Show Regression Lines", value=True)
@@ -354,14 +354,14 @@ with tab1:
                 )
             )
             
-        elif visualization_type == "Overlay Plot":
+        elif visualization_type == "Scatter Plot":
             # Create overlaid scatter plot
             fig = px.scatter(
                 data,
                 x=exposure_name,
                 y=outcome_name,
                 color=modifier_name,
-                title=f'Effect Modification by {modifier_name} (Overlay)',
+                title=f'Effect Modification by {modifier_name} (Scatter)',
                 template="simple_white",
                 height=500
             )
@@ -521,7 +521,7 @@ with tab2:
     1. **Not a bias**: Unlike confounding, effect modification is not a bias that needs to be 
        eliminated. It is a real phenomenon that should be described and understood.
     
-    2. **Measure-specific**: Effect modification can be present on one scale (e.g., relative risk) 
+    2. **Scale dependent**: Effect modification can be present on one scale (e.g., relative risk) 
        but absent on another scale (e.g., risk difference).
     
     3. **Statistical interaction**: In regression models, effect modification is often modeled using 
@@ -621,69 +621,87 @@ with tab3:
     st.markdown("## 🧠 Test Your Understanding")
     
     # Multiple quiz questions with increasing complexity
-    st.subheader("Quiz Questions")
+    st.subheader("🧐 Quiz Questions")
     
+    q1_options = [
+        "-- Select an answer --",
+        "A phenomenon where the effect of exposure is stronger/weaker in different subgroups",
+        "A bias that distorts the exposure-outcome relationship",
+        "A statistical error that should be controlled for",
+        "A type of measurement error in epidemiological studies"
+    ]
     q1 = st.radio(
         "1. Which statement best describes effect modification?",
-        [
-            "A bias that distorts the exposure-outcome relationship",
-            "A phenomenon where the effect of exposure is stronger/weaker in different subgroups",
-            "A statistical error that should be controlled for",
-            "A type of measurement error in epidemiological studies"
-        ],
+        q1_options,
+        index=0,
         key="q1"
-    )
+    )      
 
-    if q1 == "A phenomenon where the effect of exposure is stronger/weaker in different subgroups":
-        st.success("✅ Correct! Effect modification means the exposure-outcome effect differs across strata of a third variable.")
-    elif q1:  # Only show feedback if an answer has been selected
-        st.error("❌ That's not right. Effect modification is a real phenomenon, not a bias or error.")
-    
+
+    if q1 != q1_options[0]:  # Only check if user selected a real option
+        if q1 == q1_options[1]:
+            st.success("✅ Correct! Effect modification means the exposure-outcome effect differs across strata of a third variable.")
+        else:
+            st.error("❌ That's not right. Effect modification is a real phenomenon, not a bias or error.")
+  
+    q2_options = [
+        "-- Select an answer --",
+        "Effect modification remains but becomes statistically insignificant",
+        "The average effect across all groups increases",
+        "The statistical power to detect effects decreases",
+        "Effect modification disappears and all groups show similar slopes"
+        ]
     q2 = st.radio(
         "2. In the simulation, what happens when you set all group-specific effects to be equal?",
-        [
-            "Effect modification disappears and all groups show similar slopes",
-            "Effect modification remains but becomes statistically insignificant",
-            "The average effect across all groups increases",
-            "The statistical power to detect effects decreases"
-        ],
+        q2_options,
+        index=0,
         key="q2"
     )
 
-    if q2 == "Effect modification disappears and all groups show similar slopes":
-        st.success("✅ Correct! When all groups have the same effect size, there is no effect modification.")
-    elif q2:
-        st.error("❌ Try again. Think about what equal effects across groups means conceptually.")
+    if q2 != q2_options[0]:
+        if q2 == q2_options[4]:
+            st.success("✅ Correct! When all groups have the same effect size, there is no effect modification.")
+        else:
+            st.error("❌ Try again. Think about what equal effects across groups means conceptually.")
+
     
+    q3_options = [
+        "-- Select an answer --",
+        "It helps identify and remove biases in study designs",
+        "It allows for more targeted interventions in subgroups that benefit most",
+        "It increases the statistical power of epidemiological studies",
+        "It eliminates the need for adjusting for confounding variables"
+        ]
     q3 = st.radio(
         "3. Why is effect modification important in public health?",
-        [
-            "It helps identify and remove biases in study designs",
-            "It allows for more targeted interventions in subgroups that benefit most",
-            "It increases the statistical power of epidemiological studies",
-            "It eliminates the need for adjusting for confounding variables"
-        ],
+        q3_options,
+        index=0,
         key="q3"
-    )
+        )
 
-    if q3 == "It allows for more targeted interventions in subgroups that benefit most":
-        st.success("✅ Correct! Understanding effect modification helps target interventions to those who will benefit most.")
-    elif q3:
-        st.error("❌ Not quite. Think about how knowing different effects in different groups might inform intervention strategies.")
+    if q3 != q3_options[0]:
+        if q3 == q3_options[2]:
+            st.success("✅ Correct! Understanding effect modification helps target interventions to those who will benefit most.")
+        else:
+            st.error("❌ Not quite. Think about how knowing different effects in different groups might inform intervention strategies.")
     
-    q4 = st.radio(
+    q4_options = [
+        "-- Select an answer --",
+        "By removing the effect modifier from the dataset",
+        "By including interaction terms between the exposure and the effect modifier",
+        "By conducting separate analyses and not including the effect modifier",
+        "By controlling for the effect modifier as a confounder"
+        ]
+    q4 = st.radio(  
         "4. How is effect modification typically modeled in regression analysis?",
-        [
-            "By removing the effect modifier from the dataset",
-            "By including interaction terms between the exposure and the effect modifier",
-            "By conducting separate analyses and not including the effect modifier",
-            "By controlling for the effect modifier as a confounder"
-        ],
+        q4_options,
+        index=0,
         key="q4"
-    )
+        )
 
-    if q4 == "By including interaction terms between the exposure and the effect modifier":
-        st.success("✅ Correct! Interaction terms in regression models allow us to quantify how the effect of the exposure varies across levels of the effect modifier.")
+    if q4 != q4_options[0]:
+        if q4 == q4_options[2]:
+            st.success("✅ Correct! Interaction terms in regression models allow us to quantify how the effect of the exposure varies across levels of the effect modifier.")
     elif q4:
         st.error("❌ That's not the standard approach. Think about how statistical models can represent varying effects.")
     

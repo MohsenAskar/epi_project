@@ -27,14 +27,14 @@ def app():
     example = st.selectbox(
         "Select an example:",
         ["Drug Response by Age Group", 
-         "Side Effect Rates by Gender",
+         "Side Effect Rates by Sex",
          "Treatment Efficacy by Disease Severity"]
     )
     
     # Display the selected example
     if example == "Drug Response by Age Group":
         drug_response_example()
-    elif example == "Side Effect Rates by Gender":
+    elif example == "Side Effect Rates by Sex":
         side_effect_example()
     elif example == "Treatment Efficacy by Disease Severity":
         disease_severity_example()
@@ -315,10 +315,10 @@ output_vars['fig4'] = fig4
     """)
 
 def side_effect_example():
-    st.header("Side Effect Rates by Gender")
+    st.header("Side Effect Rates by Sex")
     
     st.markdown("""
-    ### Analyzing Side Effect Rates Stratified by Gender
+    ### Analyzing Side Effect Rates Stratified by Sex
     
     Men and women often respond differently to medications. This example explores how to analyze
     the relationship between drug dosage and the rate of side effects, stratified by gender.
@@ -361,7 +361,7 @@ def generate_side_effect_data(base_rate, dose_effect, n_patients, gender):
         for i in range(patients_per_group):
             had_side_effect = np.random.random() < side_effect_prob
             data.append({
-                'Gender': gender,
+                'Sex': gender,
                 'Dosage (mg)': dose,
                 'Had Side Effect': 1 if had_side_effect else 0
             })
@@ -387,7 +387,7 @@ print("\\nOverall side effect rates by dosage:")
 print(overall_rates)
 
 # Calculate side effect rates stratified by gender
-stratified_rates = all_data.groupby(['Gender', 'Dosage (mg)'])['Had Side Effect'].mean().reset_index()
+stratified_rates = all_data.groupby(['Sex', 'Dosage (mg)'])['Had Side Effect'].mean().reset_index()
 stratified_rates['Side Effect Rate (%)'] = stratified_rates['Had Side Effect'] * 100
 
 print("\\nSide effect rates stratified by gender:")
@@ -417,9 +417,9 @@ fig2 = px.bar(
     stratified_rates,
     x='Dosage (mg)',
     y='Side Effect Rate (%)',
-    color='Gender',
+    color='Sex',
     barmode='group',
-    title='Side Effect Rates Stratified by Gender',
+    title='Side Effect Rates Stratified by Sex',
     text_auto='.1f'  # Show percentages on bars
 )
 
@@ -438,9 +438,9 @@ fig3 = px.line(
     stratified_rates,
     x='Dosage (mg)',
     y='Side Effect Rate (%)',
-    color='Gender',
+    color='Sex',
     markers=True,
-    title='Side Effect Rates Trend by Gender'
+    title='Side Effect Rates Trend by Sex'
 )
 
 # Add the overall trend
@@ -465,7 +465,7 @@ fig3.update_layout(
 output_vars['fig3'] = fig3
 
 # Calculate the absolute gender difference at each dose
-diff_data = stratified_rates.pivot(index='Dosage (mg)', columns='Gender', values='Side Effect Rate (%)')
+diff_data = stratified_rates.pivot(index='Dosage (mg)', columns='Sex', values='Side Effect Rate (%)')
 diff_data['Absolute Difference'] = diff_data['Female'] - diff_data['Male']
 diff_data = diff_data.reset_index()
 
@@ -474,7 +474,7 @@ fig4 = px.bar(
     diff_data,
     x='Dosage (mg)',
     y='Absolute Difference',
-    title='Absolute Gender Difference in Side Effect Rates',
+    title='Absolute Sex Difference in Side Effect Rates',
     text_auto='.1f',
     color='Absolute Difference',
     color_continuous_scale=['blue', 'gray', 'red'],
@@ -548,13 +548,13 @@ output_vars['fig4'] = fig4
     st.markdown("""
     ### What This Analysis Shows:
     
-    1. **Gender Differences in Side Effects**: 
+    1. **Sex Differences in Side Effects**: 
        - The unstratified analysis (first plot) shows the overall side effect rate by dose
        - The stratified analysis (second and third plots) reveals how side effect rates differ between males and females
     
     2. **Why These Differences Matter**:
        - Safety concerns: Higher-risk groups may need more monitoring
-       - Dose adjustments: Gender-specific dosing might be appropriate 
+       - Dose adjustments: Sex-specific dosing might be appropriate 
        - Patient counseling: Different expectations for side effects
        - Clinical trial design: Ensuring balanced gender representation
     
@@ -568,7 +568,7 @@ output_vars['fig4'] = fig4
     - **Prescribing decisions**: Consider gender as a factor when selecting initial doses
     - **Package inserts**: Include gender-stratified side effect data when relevant
     - **Research prioritization**: Investigate mechanisms behind gender differences
-    - **Regulatory considerations**: Gender-specific warnings or contraindications may be needed
+    - **Regulatory considerations**: Sex-specific warnings or contraindications may be needed
     
     This type of stratified analysis is essential for understanding subgroup effects in drug safety!
     """)
@@ -581,6 +581,7 @@ def disease_severity_example():
     
     The same treatment might work differently depending on how severe a patient's disease is.
     This example explores how to analyze treatment efficacy stratified by disease severity.
+    With disease severity, we mean the main change from basline.
     
     Let's examine this through code:
     """)
@@ -759,7 +760,7 @@ fig3 = px.bar(
     title='Treatment Effect Size by Disease Severity',
     color='Treatment_Effect',
     text_auto='.1f',
-    color_continuous_scale='RdBu_r'
+    color_continuous_scale='RdYlGn'
 )
 
 # Update layout
@@ -861,6 +862,12 @@ output_vars['fig4'] = fig4
        - A statistically significant result may not be clinically meaningful
        - The effect size plot shows the magnitude of benefit in each group
        - The box plot shows the variability within each group, revealing overlap
+    
+    4. **Box plot interpretation**:
+    - Boxplots help you see where most values lie and how spread out the data is.
+    - The box shows the middle 50% values of the data, while the line in the box marks the median (the "middle" value).
+    - Dots or lines outside the box show unusually high or low values (outliers).
+    
     
     ### Clinical Applications:
     

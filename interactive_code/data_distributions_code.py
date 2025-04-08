@@ -11,7 +11,7 @@ import sys
 import traceback
 
 def app():
-    st.title("Hands-On Practice: Health Data Patterns")
+    st.title("Interactive Coding Laboratory: Data Distributions")
     
     st.markdown("""
     ## Learn by Doing: Apply Health Data Concepts with Code
@@ -27,7 +27,7 @@ def app():
     # Topic selection
     topic = st.selectbox(
         "Select a data pattern to explore:",
-        ["Bell Curve: Patient Measurements", 
+        ["Normal Distribution: Patient Measurements", 
          "Yes/No Outcomes: Treatment Response",
          "Rare Events: Adverse Reactions",
          "Time-to-Event: Treatment Response Time",
@@ -35,7 +35,7 @@ def app():
     )
     
     # Display the selected topic content
-    if topic == "Bell Curve: Patient Measurements":
+    if topic == "Normal Distribution: Patient Measurements":
         normal_distribution_lesson()
     elif topic == "Yes/No Outcomes: Treatment Response":
         binomial_distribution_lesson()
@@ -90,12 +90,12 @@ def execute_code(code_string):
         buffer.close()
 
 def normal_distribution_lesson():
-    st.header("Bell Curve: Patient Measurements")
+    st.header("Normal Distribution: Patient Measurements")
     
     st.markdown("""
-    ### The Bell Curve (Normal Distribution)
+    ###  Normal Distribution (The Bell Curve)
     
-    The bell curve is common in health measurements. Patient values tend to cluster around an average, 
+    The Normal Distribution (bell curve) is common in health measurements. Patient values tend to cluster around an average, 
     with fewer patients having unusually high or low values.
     
     **Health Examples:**
@@ -105,11 +105,11 @@ def normal_distribution_lesson():
     - Drug metabolism rates
     - Lab test results
     
-    Let's explore blood pressure data to see how it typically follows a bell curve pattern.
+    Let's explore blood pressure data to see how it typically follows a (Normal Distribution) bell curve pattern.
     """)
     
     # Initial code example
-    initial_code = """# Exploring blood pressure data following a bell curve pattern
+    initial_code = """# Exploring blood pressure data following a Normal Distribution pattern
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -151,7 +151,7 @@ fig.add_trace(go.Histogram(
     nbinsx=30
 ))
 
-# Add the theoretical bell curve
+# Add the theoretical Normal Distribution
 x_values = np.linspace(
     mean_bp - 4*std_bp, 
     mean_bp + 4*std_bp, 
@@ -163,7 +163,7 @@ fig.add_trace(go.Scatter(
     x=x_values,
     y=y_values,
     mode='lines',
-    name=f'Expected Bell Curve',
+    name=f'Expected Normal Distribution',
     line=dict(color='red', width=2)
 ))
 
@@ -246,7 +246,7 @@ output_vars['fig'] = fig
             st.markdown("""
             **Try changing these values:**
             - Change `mean_bp` to 130 to model a population with higher average BP
-            - Change `std_bp` to 10 to see a narrower, more peaked bell curve
+            - Change `std_bp` to 10 to see a narrower, more peaked Normal Distribution
             - Increase `sample_size` to 1000 to see how a larger sample affects the curve
             
             **Challenge yourself:**
@@ -276,15 +276,15 @@ output_vars['fig'] = fig
     # Include a discussion section
     st.subheader("Clinical Relevance")
     st.markdown("""
-    ### Why the Bell Curve Matters in Pharmacy:
+    ### Why Normal Distribution Matters in Pharmacy:
     
     1. **Reference Ranges**: Most laboratory test reference ranges are based on capturing 95% of the healthy population (roughly mean ± 2 standard deviations).
     
-    2. **Drug Dosing**: Individual variations in drug metabolism often follow a bell curve. This helps predict what percentage of patients might need dosage adjustments.
+    2. **Drug Dosing**: Individual variations in drug metabolism often follow a Normal Distribution. This helps predict what percentage of patients might need dosage adjustments.
     
     3. **Population Health**: Understanding the distribution of health measurements helps target interventions. For example, if you know the distribution of blood pressure in your patient population, you can estimate how many might need medication adjustments.
     
-    4. **Clinical Trials**: When designing studies, researchers use the bell curve properties to determine appropriate sample sizes and interpret results.
+    4. **Clinical Trials**: When designing studies, researchers use the Normal Distribution properties to determine appropriate sample sizes and interpret results.
     
     ### Practical Applications:
     
@@ -1151,7 +1151,7 @@ def lognormal_distribution_lesson():
     ### Skewed Data Pattern (Log-Normal Distribution)
     
     Many biological measurements and concentrations show a pattern where most values are on the lower end,
-    but a few are much higher (right-skewed). Often, taking the logarithm of these values produces a bell curve,
+    but a few are much higher (right-skewed). Often, taking the logarithm of these values produces a Normal Distribution,
     which is why we call this pattern "log-normal."
     
     **Health Examples:**
@@ -1346,7 +1346,7 @@ fig2.add_trace(go.Scatter(
 
 # Update layout
 fig2.update_layout(
-    title='Log-Transformed ALT Values (Should Look Like Bell Curve)',
+    title='Log-Transformed ALT Values (Should be Normally Distributed)',
     xaxis_title='Log(ALT)',
     yaxis_title='Frequency',
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),

@@ -20,7 +20,7 @@ def generate_stratified_data(effect_size, n_samples=100, random_state=None):
     if random_state is not None:
         np.random.seed(random_state)
     
-    strata = ['A', 'B', 'C']
+    strata = ['Young', 'Middle Age', 'Old']
     data = []
     
     for stratum in strata:

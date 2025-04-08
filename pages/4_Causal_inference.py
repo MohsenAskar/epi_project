@@ -113,22 +113,22 @@ with viz_tab:
     # Causal inference methods
     st.header("Common Causal Inference Methods")
     st.write("""
-    1. Regression Adjustment
+    **1. Regression Adjustment**
     - Traditional approach
     - Assumes correct model specification
     - May not capture non-linear relationships
 
-    2. Propensity Score Methods
+    **2. Propensity Score Methods**
     - Balance covariates between groups
     - Useful for high-dimensional confounding
     - Various implementation options (matching, weighting, stratification)
 
-    3. Instrumental Variables
+    **3. Instrumental Variables**
     - Useful when unmeasured confounding exists
     - Requires valid instrument
     - Can be difficult to find good instruments
 
-    4. Difference-in-Differences
+    **4. Difference-in-Differences**
     - Uses time trends to control for confounding
     - Requires parallel trends assumption
     - Useful for policy evaluation
@@ -136,19 +136,19 @@ with viz_tab:
 
     st.header("Assumptions for Causal Inference")
     st.write("""
-    1. Exchangeability (No Unmeasured Confounding)
+    **1. Exchangeability** (No Unmeasured Confounding)
     - All important confounders are measured and controlled
     - Often untestable assumption
 
-    2. Positivity
+    **2. Positivity**
     - All exposure levels possible in all confounder strata
     - Can check empirically
 
-    3. Consistency
+    **3. Consistency**
     - Well-defined intervention
     - Same exposure leads to same outcome
 
-    4. No Interference
+    **4. No Interference**
     - One unit's exposure doesn't affect another's outcome
     - May be violated in infectious disease studies
     """)
@@ -156,16 +156,18 @@ with viz_tab:
     #######################
     # Quiz for Scenarios  #
     #######################
-    st.subheader("Check Your Understanding: DAG Scenarios")
+    st.subheader("🧐 Test Your Understanding")
+
     quiz_causal = st.radio(
         "Which scenario describes a variable that *influences both the exposure and the outcome*?",
-        ("Mediation", "Confounding", "Collider", "M-Bias")
+        ("Select an answer","Mediation", "Confounding", "Collider", "M-Bias")
     )
 
-    if quiz_causal == "Confounding":
-        st.success("Correct! A confounder affects both exposure and outcome, creating a backdoor path.")
-    else:
-        st.error("Not quite. Confounders are variables associated with both exposure and outcome.")
+    if quiz_causal != "Select an answer":
+        if quiz_causal == "Confounding":
+            st.success("✅ Correct! A confounder affects both exposure and outcome, creating a backdoor path.")
+        else:
+            st.error("❌ Not quite. Confounders are variables associated with both exposure and outcome.")
 
 with code_tab:
     causal_inference_code.app()

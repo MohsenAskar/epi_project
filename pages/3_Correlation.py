@@ -13,7 +13,7 @@ st.set_page_config(layout="wide")
 st.title("Understanding Correlation")
 
 # Create tabs to separate visualization from code lab
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Visualization tab content
 with viz_tab:
@@ -75,24 +75,36 @@ with viz_tab:
     - **-1**: Perfect negative relationship (as one variable increases, the other always decreases linearly).
     - **0**: No linear relationship (though there could be a non-linear relationship).
     
+    What we illustarted here is the **correaltion between two numerical variables using Pearson Correlation**. 
+    
+    ***Remeber that there are different types of correlation metrics accrording to the type of varaibles you are dealing with (numerical, binary, categorical, etc.).*** 
+    Can you name some of them?
+    
     In a real-world example, you might see a positive correlation between the hours spent studying and exam scores. However, it's crucial to remember that **correlation ≠ causation**.
     """)
 
     # Interactive Quiz
-    st.subheader("Test Your Understanding")
+    st.subheader("🧐 Test Your Understanding")
+    quiz_options = [
+        "--- Select an answer ---",
+        "There is absolutely no relationship of any kind.",
+        "Perfect negative linear relationship.",
+        "There is no linear relationship, but there could still be a non-linear relationship."
+
+    ]
+    
     quiz_answer = st.radio(
         "If correlation = 0, which statement is correct?",
-        (
-            "There is absolutely no relationship of any kind.",
-            "There is no linear relationship, but there could still be a non-linear relationship.",
-            "Perfect negative linear relationship."
-        )
+        quiz_options,
+        index=0,    
+        key="quiz_options"
     )
 
-    if quiz_answer == "There is no linear relationship, but there could still be a non-linear relationship.":
-        st.success("Correct! Correlation only measures linear dependence.")
-    else:
-        st.error("Not quite. Remember that a correlation of 0 indicates no linear relationship.")
+    if quiz_answer != quiz_options[0]:
+        if quiz_answer == quiz_options[3]:
+            st.success("✅ Correct! Correlation only measures linear dependence.")
+        else:
+            st.error("❌ Not quite. Remember that a correlation of 0 indicates no linear relationship.")
 
     # Interactive examples
     st.header("Try it yourself!")
@@ -108,11 +120,12 @@ with viz_tab:
     """)
 
     # Additional references or concluding statement
-    st.markdown("""---
-    **Further Reading**:
-    - [Pearson vs. Spearman correlation](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient)
-    - [Correlation vs. Causation](https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation)
-    """)
+    st.header("Further Reading")
+    st.markdown("""
+            - [Pearson vs. Spearman correlation](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient)
+            - [Correlation vs. Causation](https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation)
+            """
+            )
 
 with code_tab:
     correlation_code.app()

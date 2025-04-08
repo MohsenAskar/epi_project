@@ -196,7 +196,7 @@ selection bias and see how they affect measures of association.
 """)
 
 # Create tabs for different sections
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Interactive Visualization", "📝 Educational Content", "🧠 Quiz & Exercises", "💻Code Laboratoy"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Interactive Visualization", "📝 Educational Content", "🧐 Quiz & Exercises", "💻Code Laboratoy"])
 
 with tab1:
     st.header("Selection Bias Simulator")
@@ -863,14 +863,12 @@ with tab2:
         """)
 
 with tab3:
-    st.header("Test Your Understanding")
-    
-    # Multiple quiz questions with increasing difficulty
-    st.subheader("Basic Concepts")
+    st.header("🧐 Test Your Understanding")
     
     q1 = st.radio(
         "1. Which statement correctly describes selection bias?",
         [
+            "Select an answer",
             "It occurs when the exposure is measured incorrectly",
             "It occurs when those in the study differ from those not in the study, in a way related to both exposure and outcome",
             "It's a random error that affects all epidemiological studies equally",
@@ -879,14 +877,16 @@ with tab3:
         key="q1"
     )
     
-    if q1 == "It occurs when those in the study differ from those not in the study, in a way related to both exposure and outcome":
-        st.success("✅ Correct! Selection bias involves non-random selection related to both exposure and outcome.")
-    elif q1:  # Only show feedback if an answer is selected
-        st.error("❌ That's not right. Selection bias is about who gets into your study and how that relates to both the exposure and outcome.")
+    if q1 != "Select an answer":
+        if q1 == "It occurs when those in the study differ from those not in the study, in a way related to both exposure and outcome":
+            st.success("✅ Correct! Selection bias involves non-random selection related to both exposure and outcome.")
+        elif q1:  # Only show feedback if an answer is selected
+            st.error("❌ That's not right. Selection bias is about who gets into your study and how that relates to both the exposure and outcome.")
     
     q2 = st.radio(
         "2. In the simulation, what happens when you increase the selection bias strength to maximum?",
         [
+            "Select an answer",
             "The measures of association in the selected sample become exactly the same as in the true population",
             "The selected sample becomes more representative of the true population",
             "The measures of association in the selected sample become more distorted compared to the true population",
@@ -894,17 +894,17 @@ with tab3:
         ],
         key="q2"
     )
-    
-    if q2 == "The measures of association in the selected sample become more distorted compared to the true population":
-        st.success("✅ Correct! Higher selection bias strength leads to greater distortion of the measures of association.")
-    elif q2:
-        st.error("❌ Not quite. Try experimenting with the slider and observe what happens to the measures.")
-    
-    st.subheader("Applied Knowledge")
+
+    if q2 != "Select an answer":    
+        if q2 == "The measures of association in the selected sample become more distorted compared to the true population":
+            st.success("✅ Correct! Higher selection bias strength leads to greater distortion of the measures of association.")
+        elif q2:
+            st.error("❌ Not quite. Try experimenting with the slider and observe what happens to the measures.")
     
     q3 = st.radio(
         "3. A cohort study of a new diet finds that it reduces the risk of heart disease. However, 40% of participants were lost to follow-up, with higher dropout rates among those reporting difficulty following the diet. What type of selection bias might this introduce?",
         [
+            "Select an answer",
             "Berkson's bias",
             "Healthy worker effect",
             "Differential loss to follow-up",
@@ -913,14 +913,16 @@ with tab3:
         key="q3"
     )
     
-    if q3 == "Differential loss to follow-up":
-        st.success("✅ Correct! This is a classic example of differential loss to follow-up, where participants drop out of the study non-randomly.")
-    elif q3:
-        st.error("❌ Think about what happens when participants drop out of a study non-randomly.")
-    
+    if q3 != "Select an answer":
+        if q3 == "Differential loss to follow-up":
+            st.success("✅ Correct! This is a classic example of differential loss to follow-up, where participants drop out of the study non-randomly.")
+        elif q3:
+            st.error("❌ Think about what happens when participants drop out of a study non-randomly.")
+        
     q4 = st.radio(
         "4. A case-control study uses hospital controls to study risk factors for a rare disease. How might Berkson's bias affect this study?",
         [
+            "Select an answer",
             "It would have no effect since case-control studies are immune to selection bias",
             "It could create a spurious association if the exposure increases hospitalization risk independently of the disease",
             "It would always bias results toward showing a protective effect of the exposure",
@@ -929,10 +931,11 @@ with tab3:
         key="q4"
     )
     
-    if q4 == "It could create a spurious association if the exposure increases hospitalization risk independently of the disease":
-        st.success("✅ Correct! This is exactly how Berkson's bias works - when both the exposure and outcome affect selection (hospitalization), it can create spurious associations.")
-    elif q4:
-        st.error("❌ Think about what happens when both the exposure and the outcome independently increase the chance of being in the hospital.")
+    if q4 != "Select an answer":
+        if q4 == "It could create a spurious association if the exposure increases hospitalization risk independently of the disease":
+            st.success("✅ Correct! This is exactly how Berkson's bias works - when both the exposure and outcome affect selection (hospitalization), it can create spurious associations.")
+        elif q4:
+            st.error("❌ Think about what happens when both the exposure and the outcome independently increase the chance of being in the hospital.")
     
     st.subheader("Interactive Exercise: Detecting Selection Bias")
     

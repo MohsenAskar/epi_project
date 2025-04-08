@@ -30,10 +30,8 @@ It is useful for:
 To analyze this, we stratify the data by **age group** and observe the differences.
 """)
 
-
-
 # Create tabs to separate visualization from code lab
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Visualization tab content
 with viz_tab:
@@ -42,10 +40,14 @@ with viz_tab:
 
     with col1:
         st.header("🔧 Stratification Controls")
-
+        # Add a title above the slider
+        st.markdown("**Effect Size**")
+        
+        # Add the description as a separate element
+        st.caption("(strength of relationship between Drug Dosage and Blood Pressure Reduction)")
+    
         # Slider for effect size
-        effect_size = st.slider(
-            "Effect Size (strength of relationship between variables)",
+        effect_size = st.slider("##",
             min_value=0.0,
             max_value=2.0,
             value=1.0,
@@ -75,22 +77,46 @@ with viz_tab:
     with col2:
         # Generate stratified data
         df = generate_stratified_data(effect_size)
-
-        # Rename Variables for Better Understanding
-        df = df.rename(columns={
-            "Variable 1": "Drug Dosage (mg)",
-            "Variable 2": "Blood Pressure Reduction (mmHg)",
-            "Stratum": "Age Group"
-        })
-
+        
+        # Get min and max of original data to calculate appropriate scaling
+        x_min = df["Variable 1"].min()
+        x_max = df["Variable 1"].max()
+        y_min = df["Variable 2"].min()
+        y_max = df["Variable 2"].max()
+        
+        # Calculate scaling factors to ensure data fits within realistic ranges
+        x_range = x_max - x_min
+        y_range = y_max - y_min
+        
+        # Drug dosage: Scale to fit 25-200 mg range
+        dosage_scale = 150 / x_range if x_range > 0 else 75  # Scale to fit within 175 mg range
+        dosage_middle = (25 + 200) / 2  # Middle of desired range
+        
+        # Blood pressure: Scale to fit 5-30 mmHg range
+        bp_scale = 20 / y_range if y_range > 0 else 10  # Scale to fit within 25 mmHg range
+        bp_middle = (5 + 30) / 2  # Middle of desired range
+        
+        # Transform data with calculated scaling
+        df["Drug Dosage (mg)"] = dosage_middle + (df["Variable 1"] - ((x_min + x_max) / 2)) * dosage_scale
+        df["Blood Pressure Reduction (mmHg)"] = bp_middle + (df["Variable 2"] - ((y_min + y_max) / 2)) * bp_scale
+        
+        # Rename Age Group column
+        df = df.rename(columns={"Stratum": "Age Group"})
+        
+        # Calculate actual min/max after transformation to set axis limits
+        min_dose = max(25, df["Drug Dosage (mg)"].min() - 5)
+        max_dose = min(200, df["Drug Dosage (mg)"].max() + 5)
+        min_bp = max(5, df["Blood Pressure Reduction (mmHg)"].min() - 2)
+        max_bp = min(30, df["Blood Pressure Reduction (mmHg)"].max() + 2)
+        
         # Figure 1: Overall population
         fig1 = go.Figure()
-
+        
         # Calculate overall effect (slope)
         z_overall = np.polyfit(df["Drug Dosage (mg)"], df["Blood Pressure Reduction (mmHg)"], 1)
         overall_slope = z_overall[0]
         p_overall = np.poly1d(z_overall)
-
+        
         # Add overall population scatter plot
         fig1.add_trace(
             go.Scatter(
@@ -101,32 +127,36 @@ with viz_tab:
                 marker=dict(color='blue', opacity=0.6)
             )
         )
-
+        
         # Add trend line with effect size
         fig1.add_trace(
             go.Scatter(
                 x=df["Drug Dosage (mg)"].sort_values(),
                 y=p_overall(df["Drug Dosage (mg)"].sort_values()),
                 mode='lines',
-                name=f'Overall Trend (Effect: {overall_slope:.2f} mmHg/mg)',
+                name=f'Overall Trend<br>(Effect: {overall_slope:.2f} mmHg/mg)',
                 line=dict(color='red', dash='dash')
             )
         )
-
+        
         # Update layout for overall population
         fig1.update_layout(
             height=400,
             title=f"Overall Population (All Age Groups Combined)<br>Average Effect: {overall_slope:.2f} mmHg/mg",
             xaxis_title="Drug Dosage (mg)",
             yaxis_title="Blood Pressure Reduction (mmHg)",
-            showlegend=True
+            showlegend=True,
+            # Set explicit ranges for axes using calculated limits
+            xaxis=dict(range=[min_dose, max_dose]),
+            yaxis=dict(range=[min_bp, max_bp])
         )
-
+        
         # Display the first figure
         st.plotly_chart(fig1, use_container_width=True)
-
+    
     # Move Stratified Analysis to Full Width Below
     st.markdown("---")  # Horizontal separator
+    st.write("🔄 Adjust the **effect size slider** to see how stratification reveals patterns in the data!")
 
     # Stratified Analysis Container
     with st.container():    
@@ -174,7 +204,11 @@ with viz_tab:
                 text=f"{a.text}<br>Effect: {slopes[a.text.split('=')[-1].strip()]:.2f} mmHg/mg"
             )
         )
-
+        
+        # Set consistent ranges for all facets using the same limits as fig1
+        fig2.update_xaxes(range=[min_dose, max_dose])
+        fig2.update_yaxes(range=[min_bp, max_bp])
+        
         # Update layout for stratified view
         fig2.update_layout(
             showlegend=True,
@@ -251,22 +285,30 @@ with viz_tab:
 
     # Interactive Quiz
     st.subheader("🧐 Test Your Understanding")
+
+    # Define options with a placeholder at the top
+    quiz_options = [
+        "-- Select an answer --",
+        "It always shows stronger relationships than the overall population.",
+        "It reveals patterns that might be hidden in the overall population.",
+        "It makes the data easier to collect.",
+        "It always shows weaker relationships than the overall population."
+    ]
+
+    # Add a key to keep track of the selection state
     quiz_answer = st.radio(
         "Looking at both the overall population and stratified views, what's the main advantage of stratification?",
-        (
-            "It always shows stronger relationships than the overall population.",
-            "It reveals patterns that might be hidden in the overall population.",
-            "It makes the data easier to collect.",
-            "It always shows weaker relationships than the overall population."
-        )
+        quiz_options,
+        index=0,
+        key="quiz1"
     )
 
-    if quiz_answer == "It reveals patterns that might be hidden in the overall population.":
-        st.success("✅ Correct! Stratification can uncover important differences between groups that might be masked when looking at the overall population.")
-    else:
-        st.error("❌ Not quite! Think about how the overall trend might hide different patterns in different subgroups.")
-
-    st.write("🔄 Adjust the **effect size slider** to see how stratification reveals patterns in the data!")
+    # Display feedback only after user selects a real answer
+    if quiz_answer != quiz_options[0]:  # Not the placeholder
+        if quiz_answer == "It reveals patterns that might be hidden in the overall population.":
+            st.success("✅ Correct! Stratification can uncover important differences between groups that might be masked when looking at the overall population.")
+        else:
+            st.error("❌ Not quite! Think about how the overall trend might hide different patterns in different subgroups.")
 
     # Further Reading
     st.markdown("""
@@ -276,6 +318,6 @@ with viz_tab:
     - 📈 [Confounding and Interaction](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4354892/)
     """)
 
-# Code Lab tab content - THIS IS WHERE YOU CALL THE CODE LAB MODULE
+# Code Lab tab content
 with code_tab:
     stratification_code.app()

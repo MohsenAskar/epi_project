@@ -125,7 +125,7 @@ st.markdown("### An interactive visualization tool for students")
 ######################################
 # Create columns for controls & plot #
 ######################################
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Wrap your existing visualization content in:
 with viz_tab:
@@ -367,177 +367,180 @@ with viz_tab:
                 )
                 st.metric("True Effect (Actual Parameter)", f"{true_effect:.3f}")
 
-        # Create visualizations using subplots
-        fig = make_subplots(
-            rows=2, cols=2,
-            subplot_titles=(
-                f'{exposure_name} vs {outcome_name} (Crude)',
-                f'{confounder_name} vs {exposure_name}',
-                f'{confounder_name} vs {outcome_name}',
-                'Stratified Analysis'
-            )
+    # Create visualizations using subplots
+    st.markdown("---") 
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=(
+            f'{exposure_name} vs {outcome_name} (Crude)',
+            f'{confounder_name} vs {exposure_name}',
+            f'{confounder_name} vs {outcome_name}',
+            'Stratified Analysis'
         )
+    )
 
-        # 1) Crude association: Exposure vs Outcome
+    # 1) Crude association: Exposure vs Outcome
+    fig.add_trace(
+        go.Scatter(
+            x=data[exposure_name],
+            y=data[outcome_name],
+            mode='markers',
+            name='Crude',
+            marker=dict(size=5, color='blue', opacity=0.6)
+        ),
+        row=1, col=1
+    )
+    
+    # Add regression line for crude relationship
+    x_range = np.linspace(data[exposure_name].min(), data[exposure_name].max(), 100)
+    y_pred = results['crude_coef'] * x_range + results['crude_r2'] # Using R² as a proxy for intercept
+    
+    fig.add_trace(
+        go.Scatter(
+            x=x_range,
+            y=y_pred,
+            mode='lines',
+            name='Crude Regression',
+            line=dict(color='red', width=2)
+        ),
+        row=1, col=1
+    )
+
+    # 2) Confounder vs Exposure
+    fig.add_trace(
+        go.Scatter(
+            x=data[confounder_name],
+            y=data[exposure_name],
+            mode='markers',
+            name='Conf-Exp',
+            marker=dict(size=5, color='green', opacity=0.6)
+        ),
+        row=1, col=2
+    )
+
+    # 3) Confounder vs Outcome
+    fig.add_trace(
+        go.Scatter(
+            x=data[confounder_name],
+            y=data[outcome_name],
+            mode='markers',
+            name='Conf-Out',
+            marker=dict(size=5, color='purple', opacity=0.6)
+        ),
+        row=2, col=1
+    )
+
+    # 4) Stratified analysis by confounder levels
+    strata = pd.qcut(data[confounder_name], q=3, labels=['Low', 'Medium', 'High'])
+    colors = ['blue', 'green', 'red']
+    
+    # Plot stratified data and add regression lines for each stratum
+    for stratum, color in zip(strata.unique(), colors):
+        mask = strata == stratum
+        stratum_data = data[mask]
+        
+        # Add scatter points
         fig.add_trace(
             go.Scatter(
-                x=data[exposure_name],
-                y=data[outcome_name],
+                x=stratum_data[exposure_name],
+                y=stratum_data[outcome_name],
                 mode='markers',
-                name='Crude',
-                marker=dict(size=5, color='blue', opacity=0.6)
+                name=f'Stratum {stratum}',
+                marker=dict(size=5, color=color, opacity=0.6)
             ),
-            row=1, col=1
+            row=2, col=2
         )
         
-        # Add regression line for crude relationship
-        x_range = np.linspace(data[exposure_name].min(), data[exposure_name].max(), 100)
-        y_pred = results['crude_coef'] * x_range + results['crude_r2'] # Using R² as a proxy for intercept
-        
-        fig.add_trace(
-            go.Scatter(
-                x=x_range,
-                y=y_pred,
-                mode='lines',
-                name='Crude Regression',
-                line=dict(color='red', width=2)
-            ),
-            row=1, col=1
-        )
-
-        # 2) Confounder vs Exposure
-        fig.add_trace(
-            go.Scatter(
-                x=data[confounder_name],
-                y=data[exposure_name],
-                mode='markers',
-                name='Conf-Exp',
-                marker=dict(size=5, color='green', opacity=0.6)
-            ),
-            row=1, col=2
-        )
-
-        # 3) Confounder vs Outcome
-        fig.add_trace(
-            go.Scatter(
-                x=data[confounder_name],
-                y=data[outcome_name],
-                mode='markers',
-                name='Conf-Out',
-                marker=dict(size=5, color='purple', opacity=0.6)
-            ),
-            row=2, col=1
-        )
-
-        # 4) Stratified analysis by confounder levels
-        strata = pd.qcut(data[confounder_name], q=3, labels=['Low', 'Medium', 'High'])
-        colors = ['blue', 'green', 'red']
-        
-        # Plot stratified data and add regression lines for each stratum
-        for stratum, color in zip(strata.unique(), colors):
-            mask = strata == stratum
-            stratum_data = data[mask]
+        # Calculate and add regression line for this stratum
+        if len(stratum_data) > 2:  # Need at least 3 points for regression
+            X = sm.add_constant(stratum_data[exposure_name])
+            model = sm.OLS(stratum_data[outcome_name], X).fit()
             
-            # Add scatter points
+            x_range = np.linspace(stratum_data[exposure_name].min(), stratum_data[exposure_name].max(), 100)
+            y_pred = model.params[exposure_name] * x_range + model.params['const']
+            
             fig.add_trace(
                 go.Scatter(
-                    x=stratum_data[exposure_name],
-                    y=stratum_data[outcome_name],
-                    mode='markers',
-                    name=f'Stratum {stratum}',
-                    marker=dict(size=5, color=color, opacity=0.6)
+                    x=x_range,
+                    y=y_pred,
+                    mode='lines',
+                    name=f'Regression {stratum}',
+                    line=dict(color=color, width=2)
                 ),
                 row=2, col=2
             )
-            
-            # Calculate and add regression line for this stratum
-            if len(stratum_data) > 2:  # Need at least 3 points for regression
-                X = sm.add_constant(stratum_data[exposure_name])
-                model = sm.OLS(stratum_data[outcome_name], X).fit()
-                
-                x_range = np.linspace(stratum_data[exposure_name].min(), stratum_data[exposure_name].max(), 100)
-                y_pred = model.params[exposure_name] * x_range + model.params['const']
-                
-                fig.add_trace(
-                    go.Scatter(
-                        x=x_range,
-                        y=y_pred,
-                        mode='lines',
-                        name=f'Regression {stratum}',
-                        line=dict(color=color, width=2)
-                    ),
-                    row=2, col=2
-                )
 
-        # Update layout for better readability
-        fig.update_layout(
-            height=700, 
-            showlegend=True,
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            ),
-            template="simple_white"
-        )
-        
-        # Add annotations in better positions with shorter text
-        fig.add_annotation(
-            x=0.25, y=0.95, 
-            xref="paper", yref="paper",
-            text="Unadjusted relationship",
-            showarrow=False,
-            bgcolor="rgba(255, 255, 255, 0.8)",
-            bordercolor="black",
-            borderwidth=1
-        )
-        
-        fig.add_annotation(
-            x=0.75, y=0.95, 
-            xref="paper", yref="paper",
-            text="Confounder → Exposure",
-            showarrow=False,
-            bgcolor="rgba(255, 255, 255, 0.8)",
-            bordercolor="black",
-            borderwidth=1
-        )
-        
-        fig.add_annotation(
-            x=0.25, y=0.45, 
-            xref="paper", yref="paper",
-            text="Confounder → Outcome",
-            showarrow=False,
-            bgcolor="rgba(255, 255, 255, 0.8)",
-            bordercolor="black",
-            borderwidth=1
-        )
-        
-        fig.add_annotation(
-            x=0.75, y=0.45, 
-            xref="paper", yref="paper",
-            text="Stratified by confounder",
-            showarrow=False,
-            bgcolor="rgba(255, 255, 255, 0.8)",
-            bordercolor="black",
-            borderwidth=1
-        )
-        
-        # Update axis labels
-        fig.update_xaxes(title_text=exposure_name, row=1, col=1)
-        fig.update_yaxes(title_text=outcome_name, row=1, col=1)
-        
-        fig.update_xaxes(title_text=confounder_name, row=1, col=2)
-        fig.update_yaxes(title_text=exposure_name, row=1, col=2)
-        
-        fig.update_xaxes(title_text=confounder_name, row=2, col=1)
-        fig.update_yaxes(title_text=outcome_name, row=2, col=1)
-        
-        fig.update_xaxes(title_text=exposure_name, row=2, col=2)
-        fig.update_yaxes(title_text=outcome_name, row=2, col=2)
-        
-        st.plotly_chart(fig, use_container_width=True)
+    # Update layout for better readability
+    fig.update_layout(
+        height=700, 
+        autosize=True,  # Enable autosize
+        margin=dict(l=50, r=50, t=100, b=50),
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.1,
+            xanchor="right",
+            x=0.9
+        ),
+        template="simple_white"
+    )
+    
+    # Add annotations in better positions with shorter text
+    fig.add_annotation(
+        x=0.25, y=0.95, 
+        xref="paper", yref="paper",
+        text="Unadjusted relationship",
+        showarrow=False,
+        bgcolor="rgba(255, 255, 255, 0.8)",
+        bordercolor="black",
+        borderwidth=1
+    )
+    
+    fig.add_annotation(
+        x=0.75, y=0.95, 
+        xref="paper", yref="paper",
+        text="Confounder → Exposure",
+        showarrow=False,
+        bgcolor="rgba(255, 255, 255, 0.8)",
+        bordercolor="black",
+        borderwidth=1
+    )
+    
+    fig.add_annotation(
+        x=0.25, y=0.45, 
+        xref="paper", yref="paper",
+        text="Confounder → Outcome",
+        showarrow=False,
+        bgcolor="rgba(255, 255, 255, 0.8)",
+        bordercolor="black",
+        borderwidth=1
+    )
+    
+    fig.add_annotation(
+        x=0.75, y=0.45, 
+        xref="paper", yref="paper",
+        text="Stratified by confounder",
+        showarrow=False,
+        bgcolor="rgba(255, 255, 255, 0.8)",
+        bordercolor="black",
+        borderwidth=1
+    )
+    
+    # Update axis labels
+    fig.update_xaxes(title_text=exposure_name, row=1, col=1)
+    fig.update_yaxes(title_text=outcome_name, row=1, col=1)
+    
+    fig.update_xaxes(title_text=confounder_name, row=1, col=2)
+    fig.update_yaxes(title_text=exposure_name, row=1, col=2)
+    
+    fig.update_xaxes(title_text=confounder_name, row=2, col=1)
+    fig.update_yaxes(title_text=outcome_name, row=2, col=1)
+    
+    fig.update_xaxes(title_text=exposure_name, row=2, col=2)
+    fig.update_yaxes(title_text=outcome_name, row=2, col=2)
+    
+    st.plotly_chart(fig, use_container_width=True)
 
     ########################
     # Educational Content  #
@@ -551,7 +554,7 @@ with viz_tab:
         ### What is Confounding?
         
         **Confounding** occurs when a third variable (the confounder) influences both the exposure and outcome,
-        creating a misleading association between them. It's one of the most important concepts in epidemiology
+        creating a distorted association between them. It's one of the most important concepts in epidemiology
         and can lead researchers to incorrect conclusions if not properly addressed.
         
         #### Key characteristics of a confounder:
@@ -562,12 +565,9 @@ with viz_tab:
         
         In our simulation, changing the **Confounder Strength** shows how much the relationship between exposure
         and outcome can be distorted by confounding. The difference between the crude and adjusted effects shows
-        the amount of confounding bias.
+        the amount of confounding.
         """)
         
-        st.image("https://cdn.pixabay.com/photo/2020/05/18/16/17/social-medicine-5187322_960_720.png", 
-                caption="Confounding creates spurious associations", width=400)
-
     with tab2:
         st.markdown("""
         ### Real-World Examples of Confounding
@@ -629,74 +629,94 @@ with viz_tab:
         4. **Instrumental Variables**: Using a variable that affects the outcome only through the exposure.
         """)
 
-    ###########################
-    # Interactive Quiz/Checks #
-    ###########################
-    st.header("🧪 Test Your Understanding")
+ ###########################
+# Interactive Quiz/Checks #
+###########################
+st.header("🧐 Test Your Understanding")
 
-    # More comprehensive quiz with multiple questions
-    quiz_tab1, quiz_tab2 = st.tabs(["Basic Concepts", "Applied Knowledge"])
+# More comprehensive quiz with multiple questions
+quiz_tab1, quiz_tab2 = st.tabs(["Basic Concepts", "Applied Knowledge"])
 
-    with quiz_tab1:
-        q1 = st.radio(
-            "1. Which of the following best describes why confounding can distort the observed relationship?",
-            [
-                "Because it introduces measurement error in the exposure variable.",
-                "Because the confounder is related to both the exposure and the outcome, creating a spurious association.",
-                "Because it randomly changes the outcome without affecting the exposure.",
-                "Because it only affects people who are susceptible to the outcome."
-            ]
-        )
+with quiz_tab1:
+    q1_options = [
+        "-- Select an answer --",
+        "Because it introduces measurement error in the exposure variable.",
+        "Because it randomly changes the outcome without affecting the exposure.",
+        "Because the confounder is related to both the exposure and the outcome, creating a spurious association.",
+        "Because it only affects people who are susceptible to the outcome."
+    ]
+    q1 = st.radio(
+        "1. Which of the following best describes why confounding can distort the observed relationship?",
+        q1_options,
+        index=0,
+        key="q1"
+    )
 
-        if q1 == "Because the confounder is related to both the exposure and the outcome, creating a spurious association.":
+    if q1 != q1_options[0]:  # Only check if user selected a real option
+        if q1 == q1_options[3]:
             st.success("✅ Correct! A confounder is associated with both exposure and outcome, distorting the observed effect.")
-        elif q1:  # Only show error if an answer has been selected
+        else:
             st.error("❌ Not quite. Remember, the key point is that the confounder is associated with both the exposure and the outcome.")
 
-        q2 = st.radio(
-            "2. In the simulation, what happens to the crude (unadjusted) effect when you increase the confounder strength?",
-            [
-                "It becomes closer to the true effect.",
-                "It becomes more distorted from the true effect.",
-                "It remains unchanged.",
-                "It becomes negative even when the true effect is positive."
-            ]
-        )
+    q2_options = [
+        "-- Select an answer --",
+        "It becomes closer to the true effect.",
+        "It becomes more distorted from the true effect.",
+        "It remains unchanged.",
+        "It becomes negative even when the true effect is positive."
+    ]
+    q2 = st.radio(
+        "2. In the simulation, what happens to the crude (unadjusted) effect when you increase the confounder strength?",
+        q2_options,
+        index=0,
+        key="q2"
+    )
 
-        if q2 == "It becomes more distorted from the true effect.":
+    if q2 != q2_options[0]:
+        if q2 == q2_options[2]:
             st.success("✅ Correct! As confounder strength increases, the crude effect becomes increasingly biased.")
-        elif q2:  # Only show error if an answer has been selected
+        else:
             st.error("❌ Try again. Watch what happens to the difference between crude and adjusted effects as you increase confounder strength.")
 
-    with quiz_tab2:
-        q3 = st.radio(
-            "3. In the age-smoking-cancer example, why might we see a stronger association between smoking and cancer in the crude analysis compared to after adjusting for age?",
-            [
-                "Because age reduces the harmful effects of smoking.",
-                "Because older people smoke less than younger people.",
-                "Because age is independently associated with both smoking duration and cancer risk.",
-                "Because the measurement of smoking becomes less accurate with age."
-            ]
-        )
+with quiz_tab2:
+    q3_options = [
+        "-- Select an answer --",
+        "Because age reduces the harmful effects of smoking.",
+        "Because age is independently associated with both smoking duration and cancer risk.",
+        "Because older people smoke less than younger people.",
+        "Because the measurement of smoking becomes less accurate with age."
+    ]
+    q3 = st.radio(
+        "3. In the age-smoking-cancer example, why might we see a stronger association between smoking and cancer in the crude analysis compared to after adjusting for age?",
+        q3_options,
+        index=0,
+        key="q3"
+    )
 
-        if q3 == "Because age is independently associated with both smoking duration and cancer risk.":
+    if q3 != q3_options[0]:
+        if q3 == q3_options[3]:
             st.success("✅ Correct! Age affects both the exposure (smoking duration increases with age) and the outcome (cancer risk increases with age).")
-        elif q3:  # Only show error if an answer has been selected
+        else:
             st.error("❌ Consider how age relates to both smoking patterns and cancer risk independently.")
 
-        q4 = st.radio(
-            "4. Looking at the stratified analysis (bottom-right plot), what pattern indicates that confounding has been reduced?",
-            [
-                "The regression lines for each stratum have similar slopes to the adjusted effect.",
-                "The data points become more scattered and random.",
-                "The regression lines cross each other at the center.",
-                "The regression lines all have slopes of zero."
-            ]
-        )
+    q4_options = [
+        "-- Select an answer --",
+        "The regression lines for each stratum have similar slopes to the adjusted effect.",
+        "The data points become more scattered and random.",
+        "The regression lines cross each other at the center.",
+        "The regression lines all have slopes of zero."
+    ]
+    q4 = st.radio(
+        "4. Looking at the stratified analysis (bottom-right plot), what pattern indicates that confounding has been reduced?",
+        q4_options,
+        index=0,
+        key="q4"
+    )
 
-        if q4 == "The regression lines for each stratum have similar slopes to the adjusted effect.":
+    if q4 != q4_options[0]:
+        if q4 == q4_options[1]:
             st.success("✅ Correct! When we stratify by the confounder, the slopes within each stratum should be closer to the true effect.")
-        elif q4:  # Only show error if an answer has been selected
+        else:
             st.error("❌ Think about what the slope represents in each stratum and how it relates to the true effect.")
 
     #######################

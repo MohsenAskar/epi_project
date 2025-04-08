@@ -23,7 +23,7 @@ encountered in epidemiological research and public health data analysis.
 """)
 
 # Create tabs for Visualization and Code Lab
-viz_tab, code_tab = st.tabs(["Interactive Visualization", "Code Laboratory"])
+viz_tab, code_tab = st.tabs(["📊 Interactive Visualization", "💻 Code Laboratory"])
 
 # Visualization Tab Content
 with viz_tab:
@@ -37,7 +37,7 @@ with viz_tab:
         distribution_type = st.selectbox(
             "Select Distribution",
             [
-                "Normal (Gaussian) Distribution",
+                "Normal Distribution",
                 "Binomial Distribution",
                 "Poisson Distribution",
                 "Exponential Distribution",
@@ -47,7 +47,7 @@ with viz_tab:
         )
         
         # Parameters for each distribution
-        if distribution_type == "Normal (Gaussian) Distribution":
+        if distribution_type == "Normal Distribution":
             mean = st.slider("Mean (Average Value)", -10.0, 10.0, 0.0, 0.1)
             std_dev = st.slider("Standard Deviation (Spread of Values)", 0.1, 5.0, 1.0, 0.1)
             sample_size = st.slider("Sample Size (Number of Patients)", 100, 5000, 1000, 100)
@@ -188,7 +188,7 @@ with viz_tab:
         
         # Create the histogram
         fig = go.Figure()
-        
+
         # Add histogram
         fig.add_trace(go.Histogram(
             x=data,
@@ -198,52 +198,65 @@ with viz_tab:
             opacity=0.7,
             nbinsx=30
         ))
-        
-        # Add theoretical PDF for continuous distributions
-        if distribution_type in ["Normal (Gaussian) Distribution", "Exponential Distribution", 
-                                "Log-Normal Distribution", "Uniform Distribution"]:
-            x_range = np.linspace(min(data), max(data), 1000)
+
+        # Set fixed ranges based on distribution type
+        if distribution_type == "Normal Distribution":
+            x_min, x_max = mean - 4*std_dev, mean + 4*std_dev  # Dynamic but still fixed for a given mean/std
+            x_min = min(x_min, -10)  # Ensure we see at least -10
+            x_max = max(x_max, 10)   # Ensure we see at least +10
+            y_max = 0.5
+            # Create fixed range for theory curve
+            x_range = np.linspace(x_min, x_max, 1000)
+            y_range = stats.norm.pdf(x_range, mean, std_dev)
+            pdf_name = f"Normal Expected Distribution (μ={mean}, σ={std_dev})"
+
+        elif distribution_type == "Exponential Distribution":
+            x_min, x_max = 0, max(20, scale * 5)  # Show at least 5 times the scale parameter
+            y_max = max(1.0, 1.5/scale)  # Higher y-max for smaller scale values
+            # Create fixed range for theory curve
+            x_range = np.linspace(x_min, x_max, 1000)
+            y_range = stats.expon.pdf(x_range, scale=scale)
+            pdf_name = f"Exponential Expected Distribution (β={scale})"
+
+        elif distribution_type == "Log-Normal Distribution":
+            # Use much wider range for log-normal to accommodate high skewness values
+            # Calculate a reasonable x_max based on parameters
+            theoretical_99th_percentile = np.exp(mu + 2.58 * sigma)
+            x_min = 0
+            x_max = max(100, theoretical_99th_percentile * 1.5)  # Show at least up to 100
             
-            if distribution_type == "Normal (Gaussian) Distribution":
-                y_range = stats.norm.pdf(x_range, mean, std_dev)
-                pdf_name = f"Normal Expected Distribution (μ={mean}, σ={std_dev})"
+            # For log-normal, create a non-uniform x_range with more points in lower values
+            # This gives better resolution where the density is highest
+            x_range1 = np.linspace(0.001, 5, 500)  # More points in the lower range
+            x_range2 = np.linspace(5, x_max, 500)  # Fewer points needed in the tail
+            x_range = np.unique(np.concatenate([x_range1, x_range2]))
             
-            elif distribution_type == "Exponential Distribution":
-                y_range = stats.expon.pdf(x_range, scale=scale)
-                pdf_name = f"Exponential Expected Distribution (β={scale})"
+            # Calculate theoretical PDF
+            y_range = stats.lognorm.pdf(x_range, s=sigma, scale=np.exp(mu))
+            pdf_name = f"Log-Normal Expected Distribution (μ={mu}, σ={sigma})"
             
-            elif distribution_type == "Log-Normal Distribution":
-                # Filter out potential extreme values for better visualization
-                x_range = np.linspace(max(0.001, min(data)), 
-                                    min(np.percentile(data, 99), max(data)), 1000)
-                y_range = stats.lognorm.pdf(x_range, s=sigma, scale=np.exp(mu))
-                pdf_name = f"Log-Normal Expected Distribution (μ={mu}, σ={sigma})"
+            # Dynamically adjust y-axis maximum based on the peak of the PDF
+            peak_density = np.max(y_range)
+            y_max = min(1.0, peak_density * 1.2)  # Cap at 1.0 but ensure we see the peak
+
+        elif distribution_type == "Uniform Distribution":
+            padding = (upper - lower) * 0.5  # Add 50% padding on each side
+            x_min, x_max = lower - padding, upper + padding
+            y_max = max(0.5, 1.5/(upper-lower))  # Adjust based on uniform height
+            # Create fixed range for theory curve
+            x_range = np.linspace(x_min, x_max, 1000)
+            y_range = stats.uniform.pdf(x_range, loc=lower, scale=upper-lower)
+            pdf_name = f"Uniform Expected Distribution (a={lower}, b={upper})"
+
+        elif distribution_type == "Binomial Distribution":
+            x_min, x_max = -0.5, n_trials + 0.5  # Show full range plus a bit of padding
+            y_max = max(0.4, 1.5/np.sqrt(n_trials * p_success * (1-p_success)))  # Higher for narrow distributions
+            # Generate PMF values
+            x_values = np.arange(0, n_trials + 1)
+            y_values = stats.binom.pmf(x_values, n_trials, p_success)
+            pmf_name = f"Binomial PMF (n={n_trials}, p={p_success})"
             
-            elif distribution_type == "Uniform Distribution":
-                y_range = stats.uniform.pdf(x_range, loc=lower, scale=upper-lower)
-                pdf_name = f"Uniform Expected Distribution (a={lower}, b={upper})"
-            
-            fig.add_trace(go.Scatter(
-                x=x_range,
-                y=y_range,
-                mode='lines',
-                name=pdf_name,
-                line=dict(color='red', width=2)
-            ))
-        
-        # Add PMF for discrete distributions
-        elif distribution_type in ["Binomial Distribution", "Poisson Distribution"]:
-            if distribution_type == "Binomial Distribution":
-                x_values = np.arange(0, n_trials + 1)
-                y_values = stats.binom.pmf(x_values, n_trials, p_success)
-                pmf_name = f"Binomial PMF (n={n_trials}, p={p_success})"
-            
-            elif distribution_type == "Poisson Distribution":
-                x_max = max(20, int(np.percentile(data, 99)))
-                x_values = np.arange(0, x_max + 1)
-                y_values = stats.poisson.pmf(x_values, rate)
-                pmf_name = f"Poisson PMF (λ={rate})"
-            
+            # Add PMF bars
             fig.add_trace(go.Bar(
                 x=x_values,
                 y=y_values,
@@ -251,12 +264,43 @@ with viz_tab:
                 marker_color='red',
                 opacity=0.5
             ))
-        
-        # Update layout
+
+        elif distribution_type == "Poisson Distribution":
+            lambda_ceiling = max(25, int(rate * 2.5))  # Show at least up to 25 or 2.5x lambda
+            x_min, x_max = -0.5, lambda_ceiling + 0.5
+            y_max = max(0.4, 1.2 * stats.poisson.pmf(int(rate), rate))  # Higher for peak
+            # Generate PMF values
+            x_values = np.arange(0, lambda_ceiling + 1)
+            y_values = stats.poisson.pmf(x_values, rate)
+            pmf_name = f"Poisson PMF (λ={rate})"
+            
+            # Add PMF bars
+            fig.add_trace(go.Bar(
+                x=x_values,
+                y=y_values,
+                name=pmf_name,
+                marker_color='red',
+                opacity=0.5
+            ))
+
+        # Add theory curve for continuous distributions
+        if distribution_type in ["Normal Distribution", "Exponential Distribution", 
+                                "Log-Normal Distribution", "Uniform Distribution"]:
+            fig.add_trace(go.Scatter(
+                x=x_range,
+                y=y_range,
+                mode='lines',
+                name=pdf_name,
+                line=dict(color='red', width=2)
+            ))
+
+        # Update layout with fixed scales
         fig.update_layout(
             title=f"{distribution_type} - Histogram with Theoretical Distribution",
             xaxis_title="Value",
             yaxis_title="Probability Density",
+            xaxis=dict(range=[x_min, x_max]),  # Fixed x-axis range
+            yaxis=dict(range=[0, y_max]),      # Fixed y-axis range
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -266,9 +310,8 @@ with viz_tab:
             ),
             template="plotly_white"
         )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
+
+        st.plotly_chart(fig, use_container_width=True)        
         # Add a second plot for CDF
         fig2 = go.Figure()
         
@@ -286,7 +329,7 @@ with viz_tab:
         ))
         
         # Add theoretical CDF
-        if distribution_type == "Normal (Gaussian) Distribution":
+        if distribution_type == "Normal Distribution":
             x_range = np.linspace(min(data), max(data), 1000)
             y_range = stats.norm.cdf(x_range, mean, std_dev)
             cdf_name = f"Normal CDF (μ={mean}, σ={std_dev})"
@@ -511,23 +554,6 @@ with viz_tab:
         3. Methodological research
         """)
 
-    # Interactive Quiz
-    st.header("Test Your Understanding")
-
-    question = st.radio(
-        "Which of the following data would most likely follow a Poisson distribution?",
-        [
-            "Heights of individuals in a population",
-            "Number of new COVID-19 cases per day in a small town",
-            "Time until recovery after treatment for all patients",
-            "Systolic blood pressure measurements in adults"
-        ]
-    )
-
-    if question == "Number of new COVID-19 cases per day in a small town":
-        st.success("Correct! The Poisson distribution is well-suited for modeling count data of independent events occurring in a fixed time period, like new cases per day.")
-    else:
-        st.error("Not quite right. Think about which answer involves counting discrete events occurring in a fixed time period.")
 
     # Example application
     st.header("Real-world Application Example")
@@ -1151,6 +1177,8 @@ with viz_tab:
         )
         
         st.plotly_chart(fig2, use_container_width=True)
+
+
         
         st.markdown("""
         **Discussion:**
