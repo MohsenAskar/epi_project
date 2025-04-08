@@ -1310,7 +1310,7 @@ with viz_tab:
                 )
                 
                 fig.add_annotation(
-                    x=650, y=timeline_y - 70,
+                    x=650, y=timeline_y - 150,
                     text=f"Cases<br>n={n_cases}",
                     showarrow=False,
                     font=dict(size=14)
@@ -1352,7 +1352,7 @@ with viz_tab:
                         "• Establish clear diagnostic criteria",
                     showarrow=False,
                     font=dict(size=14),
-                    align="center"
+                    align="left"
                 )
                 
             elif steps == "2. Select Controls":
@@ -1366,7 +1366,7 @@ with viz_tab:
                 )
                 
                 fig.add_annotation(
-                    x=650, y=timeline_y - 70,
+                    x=650, y=timeline_y - 150,
                     text=f"Cases<br>n={n_cases}",
                     showarrow=False,
                     font=dict(size=14)
@@ -1382,7 +1382,7 @@ with viz_tab:
                 )
                 
                 fig.add_annotation(
-                    x=650, y=timeline_y + 70,
+                    x=650, y=timeline_y + 150,
                     text=f"Controls<br>n={n_controls}<br>({control_ratio}:1 ratio)",
                     showarrow=False,
                     font=dict(size=14)
@@ -7010,13 +7010,13 @@ with viz_tab:
                 fig.add_shape(
                     type="rect",
                     x0=10, x1=210,  # Positioned under subcohort box
-                    y0=timeline_y - 230, y1=timeline_y - 150,  # Below subcohort box
+                    y0=timeline_y - 250, y1=timeline_y - 150,  # Below subcohort box
                     line=dict(color="black", width=1),
                     fillcolor="white"
                 )
                 
                 fig.add_annotation(
-                    x=110, y=timeline_y - 190,  # Center of the new box position
+                    x=110, y=timeline_y - 200,  # Center of the new box position
                     text="Step 4: Identify all cases<br>" +
                         f"• Disease A: {n_disease_A} cases<br>" +
                         f"• Disease B: {n_disease_B} cases<br>" +
@@ -7033,8 +7033,8 @@ with viz_tab:
                 
                 # Position the disease boxes on the right side where the explanation was
                 for i, (disease, count, color) in enumerate(zip(case_types, case_counts, case_colors)):
-                    x_pos = 550  # Center position for right side boxes
-                    y_pos = timeline_y - 75 - i * 70  # Vertical spacing between boxes
+                    x_pos = 650  # Center position for right side boxes
+                    y_pos = timeline_y - 120 - i * 70  # Vertical spacing between boxes
                     
                     # Box for disease cases
                     fig.add_shape(
@@ -7126,36 +7126,7 @@ with viz_tab:
                     showarrow=False,
                     font=dict(size=12)
                 )
-                
-                # Connect subcohort and external cases to analysis sample
-                fig.add_annotation(
-                    x=275, y=timeline_y - 60,
-                    ax=400, ay=timeline_y - 95,
-                    text="",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowwidth=1.5,
-                    arrowcolor="black"
-                )
-                
-                fig.add_annotation(
-                    x=525, y=timeline_y - 60,
-                    ax=400, ay=timeline_y - 95,
-                    text="",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowwidth=1.5,
-                    arrowcolor="black"
-                )
-                
-                # Add explanation
-                fig.add_shape(
-                    type="rect",
-                    x0=130, x1=680,
-                    y0=timeline_y - 270, y1=timeline_y - 155,
-                    line=dict(color="black", width=1),
-                    fillcolor="white"
-                )
+            
                 
                 fig.add_annotation(
                     x=400, y=timeline_y - 212.5,
