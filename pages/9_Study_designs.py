@@ -468,7 +468,7 @@ with viz_tab:
                 # Add explanation
                 fig.add_shape(
                     type="rect",
-                    x0=250, x1=550,
+                    x0=200, x1=600,
                     y0=timeline_y - 150, y1=timeline_y - 50,
                     line=dict(color="black", width=1),
                     fillcolor="white"
