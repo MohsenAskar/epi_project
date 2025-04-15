@@ -568,12 +568,40 @@ with viz_tab:
             
             st.plotly_chart(fig, use_container_width=True)
             
-            # Optional animation
+            # For the Cohort Study animation (around line 340-450)
             if st.checkbox("Show animated progression through follow-up", key="cohort_animation"):
                 progress_bar = st.progress(0)
                 current_year = st.empty()
                 animation_plot = st.empty()
                 animation_description = st.empty()
+                
+                # Select a fixed sample before starting the animation
+                # Choose a balanced sample with exposed/unexposed individuals and with/without events
+                sample_size = 20
+                
+                # Get participants who are exposed and have events
+                exposed_with_event = cohort_data[(cohort_data['Exposed'] == 1) & (cohort_data['Event_Occurred'] == 1)].sample(
+                    min(5, sum((cohort_data['Exposed'] == 1) & (cohort_data['Event_Occurred'] == 1)))
+                )
+                
+                # Get participants who are exposed without events
+                exposed_without_event = cohort_data[(cohort_data['Exposed'] == 1) & (cohort_data['Event_Occurred'] == 0)].sample(
+                    min(5, sum((cohort_data['Exposed'] == 1) & (cohort_data['Event_Occurred'] == 0)))
+                )
+                
+                # Get participants who are unexposed and have events
+                unexposed_with_event = cohort_data[(cohort_data['Exposed'] == 0) & (cohort_data['Event_Occurred'] == 1)].sample(
+                    min(5, sum((cohort_data['Exposed'] == 0) & (cohort_data['Event_Occurred'] == 1)))
+                )
+                
+                # Get participants who are unexposed without events
+                unexposed_without_event = cohort_data[(cohort_data['Exposed'] == 0) & (cohort_data['Event_Occurred'] == 0)].sample(
+                    min(5, sum((cohort_data['Exposed'] == 0) & (cohort_data['Event_Occurred'] == 0)))
+                )
+                
+                # Combine into one fixed sample
+                fixed_sample = pd.concat([exposed_with_event, exposed_without_event, unexposed_with_event, unexposed_without_event])
+                
                 # Create animation
                 for t in range(0, followup_years * 10 + 1):
                     time_point = t / 10
@@ -600,9 +628,9 @@ with viz_tab:
                         line=dict(color="red", width=2, dash="dash"),
                     )
                     
-                    # Add participants (sample)
-                    sample_size = 20
-                    sample = cohort_data.sample(sample_size)
+                    # Use the fixed sample instead of generating a new one each time
+                    sample = fixed_sample
+                    
                     # Count events up to this time point for the animation
                     events_exposed_so_far = sum((sample['Exposed'] == 1) & 
                                             (sample['Event_Occurred'] == 1) & 
@@ -644,7 +672,7 @@ with viz_tab:
                         xaxis_title="Follow-up Time (Years)",
                         height=500,
                         xaxis=dict(range=[-0.1, followup_years + 0.1]),
-                        yaxis=dict(showticklabels=False, range=[0, sample_size + 1])
+                        yaxis=dict(showticklabels=False, range=[0, len(sample) + 1])
                     )
                     
                     animation_plot.plotly_chart(anim_fig, use_container_width=True)
@@ -681,7 +709,7 @@ with viz_tab:
                         else:
                             st.info("**Late follow-up:** Approaching study completion. The final pattern of events will determine our risk estimates.")
                     
-                    time_module.sleep(1)  # Control animation speed 
+                    time_module.sleep(0.5)  # Control animation speed
                            
         # Conceptual overview tab
         with tab_concepts:
@@ -5827,12 +5855,35 @@ with viz_tab:
             
             st.plotly_chart(fig, use_container_width=True)
             
-            # Optional animation 
+            # For the Nested Case-Control animation (around line 2400-2500)
             if st.checkbox("Show animated progression through follow-up", key="ncc_animation"):
                 progress_bar = st.progress(0)
                 current_year = st.empty()
                 animation_plot = st.empty()
-                animation_description = st.empty()  # Add this line for the description
+                animation_description = st.empty()
+                
+                # Create a fixed, balanced sample before starting the animation
+                sample_size = 20
+                
+                # Get a mix of exposed cases, exposed non-cases, unexposed cases, and unexposed non-cases
+                exposed_cases = cohort_data[(cohort_data['exposure'] == 1) & (cohort_data['is_case'])].sample(
+                    min(5, sum((cohort_data['exposure'] == 1) & (cohort_data['is_case'])))
+                )
+                
+                exposed_non_cases = cohort_data[(cohort_data['exposure'] == 1) & (~cohort_data['is_case'])].sample(
+                    min(5, sum((cohort_data['exposure'] == 1) & (~cohort_data['is_case'])))
+                )
+                
+                unexposed_cases = cohort_data[(cohort_data['exposure'] == 0) & (cohort_data['is_case'])].sample(
+                    min(5, sum((cohort_data['exposure'] == 0) & (cohort_data['is_case'])))
+                )
+                
+                unexposed_non_cases = cohort_data[(cohort_data['exposure'] == 0) & (~cohort_data['is_case'])].sample(
+                    min(5, sum((cohort_data['exposure'] == 0) & (~cohort_data['is_case'])))
+                )
+                
+                # Combine into a fixed sample
+                fixed_sample = pd.concat([exposed_cases, exposed_non_cases, unexposed_cases, unexposed_non_cases])
                 
                 # Create animation
                 for t in range(0, followup_years * 10 + 1):
@@ -5860,9 +5911,8 @@ with viz_tab:
                         line=dict(color="red", width=2, dash="dash"),
                     )
                     
-                    # Add participants (sample)
-                    sample_size = 20
-                    sample = cohort_data.sample(sample_size)
+                    # Use the fixed sample instead of generating a new one each time
+                    sample = fixed_sample
                     
                     # Count cases and exposure status for the description
                     cases_so_far = sum((sample['is_case']) & (sample['observed_time'] <= time_point))
@@ -5871,6 +5921,7 @@ with viz_tab:
                     exposed_cases = sum((sample['exposure'] == 1) & (sample['is_case']) & (sample['observed_time'] <= time_point))
                     unexposed_cases = sum((sample['exposure'] == 0) & (sample['is_case']) & (sample['observed_time'] <= time_point))
                     
+                    # Draw each participant's follow-up line
                     for i, (_, subject) in enumerate(sample.iterrows()):
                         y_pos = i + 1
                         
@@ -5904,7 +5955,7 @@ with viz_tab:
                         xaxis_title="Follow-up Time (Years)",
                         height=500,
                         xaxis=dict(range=[-0.1, followup_years + 0.1]),
-                        yaxis=dict(showticklabels=False,range=[0, sample_size + 1])
+                        yaxis=dict(showticklabels=False, range=[0, sample_size + 1])
                     )
                     
                     animation_plot.plotly_chart(anim_fig, use_container_width=True)
@@ -5952,8 +6003,7 @@ with viz_tab:
                         else:
                             st.info("**Late follow-up:** Case accumulation is stabilizing. The nested case-control design maintains temporality while improving efficiency.")
                     
-                    time_module.sleep(0.5)  # Control animation speed
-        
+                    time_module.sleep(0.5)  # Control animation speed        
         # Conceptual overview tab
         with tab_concepts:
             st.subheader("Nested Case-Control Study: Conceptual Overview")
@@ -7226,7 +7276,173 @@ with viz_tab:
             )
             
             st.plotly_chart(fig, use_container_width=True)
-        
+            # For the Case-Cohort Study animation 
+            if st.checkbox("Show animated progression through follow-up", key="cc_animation"):
+                progress_bar = st.progress(0)
+                current_year = st.empty()
+                animation_plot = st.empty()
+                animation_description = st.empty()
+                
+                # Create a fixed sample with good representation of subcohort and cases
+                sample_size = 20
+                
+                # Get subcohort participants - both cases and non-cases
+                subcohort_cases = cohort_data[(cohort_data['in_subcohort']) & (
+                    cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])].sample(
+                    min(5, sum(cohort_data['in_subcohort'] & (
+                        cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])))
+                )
+                
+                subcohort_non_cases = cohort_data[(cohort_data['in_subcohort']) & 
+                                                ~(cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])].sample(
+                    min(5, sum(cohort_data['in_subcohort'] & 
+                            ~(cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])))
+                )
+                
+                # Get non-subcohort cases
+                non_subcohort_cases = cohort_data[(~cohort_data['in_subcohort']) & (
+                    cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])].sample(
+                    min(5, sum(~cohort_data['in_subcohort'] & (
+                        cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])))
+                )
+                
+                # Get non-subcohort non-cases (for comparison)
+                non_subcohort_non_cases = cohort_data[(~cohort_data['in_subcohort']) & 
+                                                    ~(cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])].sample(
+                    min(5, sum(~cohort_data['in_subcohort'] & 
+                            ~(cohort_data['disease_A'] | cohort_data['disease_B'] | cohort_data['disease_C'])))
+                )
+                
+                # Combine into a fixed sample
+                fixed_sample = pd.concat([subcohort_cases, subcohort_non_cases, non_subcohort_cases, non_subcohort_non_cases])
+                
+                # Create animation
+                for t in range(0, followup_years * 10 + 1):
+                    time_point = t / 10
+                    progress = int(100 * time_point / followup_years)
+                    progress_bar.progress(progress)
+                    current_year.markdown(f"### Year {time_point:.1f}")
+                    
+                    # Create frame for this time point
+                    anim_fig = go.Figure()
+                    
+                    # Draw timeline
+                    anim_fig.add_shape(
+                        type="line",
+                        x0=0, x1=followup_years,
+                        y0=0, y1=0,
+                        line=dict(color="black", width=2),
+                    )
+                    
+                    # Add time marker
+                    anim_fig.add_shape(
+                        type="line",
+                        x0=time_point, x1=time_point,
+                        y0=-0.2, y1=20,
+                        line=dict(color="red", width=2, dash="dash"),
+                    )
+                    
+                    # Use the fixed sample
+                    sample = fixed_sample
+                    
+                    # Count cases up to this time point for the description
+                    # These calculations would need to be adapted to the specific cohort data structure
+                    cases_so_far = sum((sample['disease_A'] | sample['disease_B'] | sample['disease_C']) &
+                                    (sample['observed_time'] <= time_point))
+                    subcohort_size = sum(sample['in_subcohort'])
+                    
+                    # Loop through each participant and draw their follow-up line
+                    for i, (_, subject) in enumerate(sample.iterrows()):
+                        y_pos = i + 1
+                        
+                        # Line color based on subcohort membership
+                        line_color = "green" if subject['in_subcohort'] else "gray"
+                        line_width = 2 if subject['in_subcohort'] else 1
+                        line_dash = "solid" if subject['in_subcohort'] else "dot"
+                        
+                        # Draw line up to current time or event time
+                        x_end = min(time_point, subject['observed_time'])
+                        
+                        anim_fig.add_shape(
+                            type="line",
+                            x0=0, x1=x_end,
+                            y0=y_pos, y1=y_pos,
+                            line=dict(
+                                color=line_color,
+                                width=line_width,
+                                dash=line_dash
+                            ),
+                        )
+                        
+                        # Add event marker if applicable
+                        is_case = subject['disease_A'] | subject['disease_B'] | subject['disease_C']
+                        if is_case and subject['observed_time'] <= time_point:
+                            anim_fig.add_trace(go.Scatter(
+                                x=[subject['observed_time']],
+                                y=[y_pos],
+                                mode="markers",
+                                marker=dict(color="red", size=8, symbol="x"),
+                                name="Case",
+                                showlegend=False
+                            ))
+                    
+                    # Update layout
+                    anim_fig.update_layout(
+                        title=f"Case-Cohort Follow-up at Year {time_point:.1f}",
+                        xaxis_title="Follow-up Time (Years)",
+                        height=500,
+                        xaxis=dict(range=[-0.1, followup_years + 0.1]),
+                        yaxis=dict(showticklabels=False, range=[0, len(sample) + 1])
+                    )
+                    
+                    animation_plot.plotly_chart(anim_fig, use_container_width=True)
+                    
+                    # Add description
+                    with animation_description.container():
+                        st.subheader("What's happening in this animation:")
+                        
+                        st.write(f"**Current time point:** Year {time_point:.1f} of {followup_years} years follow-up")
+                        
+                        st.write("**What you're seeing:**")
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            st.markdown("• <span style='color:green; font-weight:bold;'>Green solid lines:</span>", unsafe_allow_html=True)
+                            st.markdown("• <span style='color:gray; font-weight:bold;'>Gray dotted lines:</span>", unsafe_allow_html=True)
+                            st.markdown("• <span style='color:red; font-weight:bold;'>Red X markers:</span>", unsafe_allow_html=True)
+                            st.markdown("• <span style='color:red; font-weight:bold;'>Vertical red line:</span>", unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.write(f"Subcohort participants ({subcohort_size} people - randomly selected at baseline)")
+                            st.write(f"Non-subcohort participants ({len(sample) - subcohort_size} people - not in detailed analysis)")
+                            st.write("Case events that have occurred (all cases are analyzed regardless of subcohort status)")
+                            st.write("Current point in follow-up time")
+                        
+                        st.write(f"**Cases so far:** {cases_so_far} total cases")
+                        
+                        # Count cases by subcohort status
+                        subcohort_cases_so_far = sum(sample['in_subcohort'] & 
+                                                ((sample['disease_A'] | sample['disease_B'] | sample['disease_C']) &
+                                                (sample['observed_time'] <= time_point)))
+                        non_subcohort_cases_so_far = cases_so_far - subcohort_cases_so_far
+                        
+                        st.write(f"**Cases by subcohort status:** {subcohort_cases_so_far} in subcohort, {non_subcohort_cases_so_far} outside subcohort")
+                        
+                        st.write("This animation demonstrates how a case-cohort study works:")
+                        st.write("1. We select a random subcohort at baseline (green lines)")
+                        st.write("2. We follow the entire cohort, but detailed measurements are only done on the subcohort")
+                        st.write("3. As cases occur, we identify all of them with red X markers")
+                        st.write("4. The analysis includes the entire subcohort plus all cases not in the subcohort")
+                        st.write("5. This approach is efficient for studying multiple diseases with the same subcohort")
+                        
+                        # Add context-specific message based on time point
+                        if time_point < followup_years * 0.25:
+                            st.info("**Early follow-up:** The subcohort was selected at baseline. As cases occur, we add them to our analysis set whether or not they're in the subcohort.")
+                        elif time_point < followup_years * 0.75:
+                            st.info("**Mid follow-up:** Cases are accumulating from both within and outside the subcohort. All cases will be included in the analysis, along with the entire subcohort.")
+                        else:
+                            st.info("**Late follow-up:** The case-cohort design has allowed us to efficiently study the relationship between exposure and disease without measuring exposures in the entire cohort.")
+                    
+                    time_module.sleep(0.5)  # Control animation speed        
         # Multiple disease advantage tab
         with tab_multidisease:
             st.subheader("Case-Cohort Design: Multiple Disease Advantage")
@@ -7687,7 +7903,7 @@ with viz_tab:
                 
                 Despite this variation, the expected sample size remains relatively stable.
                 """)
-        
+   
         # Design comparison tab
         with tab_compare:
             st.subheader("Study Design Comparison: Case-Cohort vs. Other Designs")
